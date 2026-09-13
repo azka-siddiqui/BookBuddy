@@ -1,0 +1,21 @@
+server:
+  port: ${CATALOG_PORT:8081}
+
+spring:
+  application:
+    name: catalog-service
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://localhost:27017}
+      database: ${MONGO_DATABASE:bookbuddy}
+      auto-index-creation: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.bookbuddy.catalog: INFO
