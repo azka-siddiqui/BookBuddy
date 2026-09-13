@@ -25,8 +25,12 @@ A single MongoDB deployment holds the following primary collections:
 
 ## Cross-cutting
 
-- **Authentication:** JWT issued by `social-service`; validated at the gateway and by
-  downstream services. Passwords hashed with BCrypt via Spring Security.
+- **Authentication:** JWT issued by `social-service`. The gateway validates the token
+  on every non-public request and injects a trusted `X-User-Id` header for downstream
+  services (client-supplied `X-User-Id` is stripped to prevent spoofing). `social-service`
+  additionally validates the token itself (defense in depth). Passwords are hashed with
+  BCrypt via Spring Security.
+- **Public routes:** `POST /api/auth/register` and `POST /api/auth/login` require no token.
 - **Inter-service calls:** REST over HTTP using Spring's `RestClient`.
 - **Deployment:** Docker Compose for local development; AWS (ECS) manifests/IaC for cloud.
 
