@@ -1,0 +1,27 @@
+server:
+  port: ${DISCOVERY_PORT:8082}
+
+spring:
+  application:
+    name: discovery-service
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://localhost:27017}
+      database: ${MONGO_DATABASE:bookbuddy}
+      auto-index-creation: true
+
+openlibrary:
+  base-url: ${OPEN_LIBRARY_BASE_URL:https://openlibrary.org}
+  connect-timeout: 5000
+  read-timeout: 10000
+  max-results: 20
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.bookbuddy.discovery: INFO
