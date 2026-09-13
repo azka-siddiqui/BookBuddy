@@ -1,0 +1,62 @@
+server:
+  port: ${GATEWAY_PORT:8080}
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      default-filters:
+        # Prevent duplicate CORS headers; the CorsWebFilter handles CORS.
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+      routes:
+        - id: auth
+          uri: ${SOCIAL_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/auth/**
+        - id: profile
+          uri: ${SOCIAL_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/profile/**
+        - id: recommendations
+          uri: ${SOCIAL_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/recommendations/**
+        - id: clubs
+          uri: ${SOCIAL_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/clubs/**
+        - id: books
+          uri: ${CATALOG_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/books/**
+        - id: wishlist
+          uri: ${CATALOG_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/wishlist/**
+        - id: ratings
+          uri: ${CATALOG_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/ratings/**
+        - id: discovery
+          uri: ${DISCOVERY_URI:http://localhost:8082}
+          predicates:
+            - Path=/api/discovery/**
+
+jwt:
+  # Must match social-service's signing secret. Override via JWT_SECRET everywhere.
+  secret: ${JWT_SECRET:ZGV2LW9ubHktc2VjcmV0LWNoYW5nZS1tZS1pbi1wcm9kdWN0aW9uLTI1Ng==}
+
+bookbuddy:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.bookbuddy.gateway: INFO
