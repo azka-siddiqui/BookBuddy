@@ -1,0 +1,41 @@
+# ---- Java / Maven ----
+target/
+*.jar
+*.war
+*.class
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+HELP.md
+
+# ---- Spring Boot ----
+*.log
+application-local.yml
+application-local.properties
+
+# ---- Node / React ----
+node_modules/
+dist/
+dist-ssr/
+build/
+*.local
+.vite/
+coverage/
+
+# ---- Environment / secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- IDE / editor ----
+.idea/
+*.iml
+.vscode/
+*.swp
+.DS_Store
+
+# ---- Docker ----
+*.pid
+
+# ---- MongoDB local data ----
+data/db/
+mongo-data/
