@@ -1,0 +1,29 @@
+[
+  {
+    "_id": "c1000000-0000-0000-0000-000000000038",
+    "name": "Book Club 38",
+    "genres": ["War", "Coming of Age"],
+    "capacity": 20,
+    "memberCount": 19,
+    "version": 0,
+    "createdAt": "2024-02-01T00:00:00Z"
+  },
+  {
+    "_id": "c1000000-0000-0000-0000-000000000012",
+    "name": "Galaxy Readers",
+    "genres": ["Science Fiction", "Humor", "Adventure"],
+    "capacity": 50,
+    "memberCount": 12,
+    "version": 0,
+    "createdAt": "2024-02-01T00:00:00Z"
+  },
+  {
+    "_id": "c1000000-0000-0000-0000-000000000007",
+    "name": "The Wizarding Shelf",
+    "genres": ["Fantasy", "Young Adult", "Magic"],
+    "capacity": 30,
+    "memberCount": 21,
+    "version": 0,
+    "createdAt": "2024-02-01T00:00:00Z"
+  }
+]
