@@ -1,85 +1,126 @@
 <div align="center">
+  <br>
 
-# 📚 BookBuddy
+  # BookBuddy
+  <i> Discover, track and share books!</i> <br>
 
-**Discover, track, and share books.**
+A full-stack reading platform with personalized recommendations, reading streaks, and book clubs — built as Spring Boot microservices behind an API gateway, with book data scraped from the Open Library API.
 
-A full-stack book discovery, tracking, and social reading platform — built as a set of
-Spring Boot microservices behind an API gateway, backed by MongoDB, with a React frontend
-and JWT authentication. Book data is ingested by scraping the public Open Library API.
-
-<br />
-
-![Java](https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3-6DB33F?logo=springboot&logoColor=white)
-![Spring Cloud Gateway](https://img.shields.io/badge/Spring%20Cloud-Gateway-6DB33F?logo=spring&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?logo=mongodb&logoColor=white)
-![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
-![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
-![JWT](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
-![AWS](https://img.shields.io/badge/AWS-ECS%20Fargate-FF9900?logo=amazonaws&logoColor=white)
-
-<br />
-
-<img width="900" alt="BookBuddy screenshot" src="https://github.com/user-attachments/assets/99cc4de0-0d6e-483b-a6c9-df9052a7f312" />
-
+![Java][Java]
+![Spring Boot][Spring]
+![MongoDB][MongoDB]
+![React][React.js]
+![Docker][Docker]
 </div>
 
-<br />
-
-> Built after years of tracking my reading list in a Google Doc and wanting a better
-> interface — BookBuddy turns that into a real, social, self-hostable reading platform.
-
-<br />
-
-## 📖 Table of contents
-
-<details open>
-<summary>Click to expand</summary>
-
-- [Features](#-features)
-- [Tech stack](#-tech-stack)
-- [Architecture](#-architecture)
-- [API overview](#-api-overview)
-- [Run locally with Docker Compose](#-run-locally-with-docker-compose)
-- [Run without Docker](#-run-without-docker)
-- [Ingest real books from Open Library](#-ingest-real-books-from-open-library)
-- [Configuration](#-configuration)
-- [Tests](#-tests)
-- [Cloud deployment](#-cloud-deployment)
-- [Documentation](#-documentation)
-- [Contributors](#-contributors)
-
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#bookbuddy">BookBuddy</a>
+      <ul>
+        <li><a href="#tech-stack">Tech Stack</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#setup-instructions">Setup Instructions</a>
+      <ul>
+        <li><a href="#running-with-docker">Running with Docker</a></li>
+        <li><a href="#running-locally">Running Locally</a></li>
+      </ul>
+    </li>
+    <li><a href="#features-implemented">Features Implemented</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#screenshots">Screenshots</a></li>
+    <li><a href="#contributors">Contributors</a></li>
+  </ol>
 </details>
 
-<br />
 
-## ✨ Features
 
-- **Discover** — search books by title and browse the top books by rating or wishlist count.
-- **Track** — wishlist books, mark them in-progress or finished, and keep a reading streak.
-- **Recommendations** — personalized book suggestions and genre-based book club recommendations.
-- **Community** — find books you have in common with other readers, and join capacity-limited book clubs.
-- **Secure auth** — registration/login with BCrypt-hashed passwords and JWT bearer tokens.
+## Setup instructions
 
-<br />
+BookBuddy runs as four Spring Boot services (an API gateway plus catalog, discovery, and social services), a MongoDB instance, and a React frontend. \
+Copy `.env.example` to `.env` in the root of the repository and fill in your values before starting anything. \
+The important ones are:
+```.env
+MONGO_URI=mongodb://localhost:27017
+MONGO_DATABASE=bookbuddy
+JWT_SECRET=...   # base64-encoded 256-bit secret; generate with: openssl rand -base64 32
+JWT_EXPIRATION_MS=86400000
+```
+> The default `JWT_SECRET` is fine for local development, but set a real one anywhere else — every service has to share the same secret for tokens to validate.
 
-## 🛠 Tech stack
+### Running with Docker
 
-| Layer        | Technology                                                        |
-|--------------|-------------------------------------------------------------------|
-| Backend      | Java 21, Spring Boot 3.3, Spring Security, Spring Cloud Gateway    |
-| Data         | MongoDB 7 (documents + aggregation)                               |
-| Auth         | JWT (JJWT), BCrypt                                                 |
-| Frontend     | React 18, React Router 6, Vite 5                                  |
-| Ingestion    | Open Library API via Spring `RestClient`                          |
-| Local run    | Docker Compose                                                    |
-| Cloud        | AWS ECS Fargate (Terraform, see [`deploy/aws`](deploy/aws/README.md)) |
+The quickest way to get everything up is Docker Compose, which brings up MongoDB, seeds the sample data, builds all four services, and serves the frontend:
 
-<br />
+```bash
+docker compose up --build
+```
 
-## 🏗 Architecture
+Once the containers are healthy the frontend is on <http://localhost:3000> and the API gateway on <http://localhost:8080>. \
+Sign in with the demo account **`alex` / `password123`** (the seed also creates `sam` and `jordan`).
+
+### Running locally
+
+To run the stack by hand you will need **JDK 21**, **Maven**, **Node 18+**, and a local MongoDB on `mongodb://localhost:27017`.
+
+First seed the sample data (books, clubs, reading progress, …):
+```bash
+MONGO_URI=mongodb://localhost:27017 MONGO_DATABASE=bookbuddy SEED_DIR=./seed \
+  sh deploy/seed/seed.sh
+```
+
+Then build and start the services. The social service seeds the demo users on startup under the default `dev` profile, so start it first:
+```bash
+mvn -q -DskipTests package
+java -jar services/social-service/target/*.jar
+java -jar services/catalog-service/target/*.jar
+java -jar services/discovery-service/target/*.jar
+java -jar services/api-gateway/target/*.jar
+```
+
+Finally, the frontend:
+```bash
+cd frontend
+npm install
+npm run dev   # http://localhost:5173
+```
+
+To pull real books in from Open Library, the discovery service ingests on demand:
+```bash
+curl -X POST http://localhost:8082/api/discovery/ingest \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"harry potter"}'
+```
+
+---
+
+## Features Implemented
+
+The application supports the following features, split across the catalog, social, and discovery services:
+
+### Discovery & Catalog
+- Search for books by title
+- View the top books by rating and by wishlist count
+- Add and remove books from a wishlist
+- Ingest real book data by scraping the Open Library API
+
+### Social & Reading
+- **Tag-Based Book Recommendations:** Suggests books from your tag preferences by finding other readers with similar tastes.
+- **Genre-Based Book Clubs:** Recommends clubs that line up with your reading history.
+- **Book Completion Rate:** Shows how many readers finish a book after starting it — handy for picking engaging reads.
+- **Capacity-Safe Club Join:** Guards the last open slot in a club so concurrent joins stay fair.
+- **Reading Streak:** Tracks consecutive reading days to keep you motivated.
+- **Secure Auth:** Registration and login with BCrypt-hashed passwords and JWT bearer tokens.
+
+---
+
+## Architecture
+
+Every request from the React SPA goes through the API gateway, which validates the JWT and injects a trusted `X-User-Id` header before routing to the right service. All four services share a single MongoDB deployment.
 
 ```
                      ┌──────────────┐
@@ -109,144 +150,35 @@ and JWT authentication. Book data is ingested by scraping the public Open Librar
 | `discovery-service` | 8082 | Scrapes and normalizes book data from the Open Library API into MongoDB.      |
 | `social-service`    | 8083 | Auth (JWT), users, book clubs, recommendations, reading progress, streaks.    |
 
-More detail in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and the data model in
-[`docs/DATA_MODEL.md`](docs/DATA_MODEL.md).
+More detail lives in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), the data model in [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md), and the AWS ECS Fargate deployment in [`deploy/aws`](deploy/aws/README.md).
 
-<br />
+---
+## Screenshots
+**Home page:** \
+<img width="1439" height="761" alt="BookBuddy home page" src="https://github.com/user-attachments/assets/99cc4de0-0d6e-483b-a6c9-df9052a7f312" />
 
-## 🔌 API overview
+# Tech stack
 
-All requests go through the gateway at `http://localhost:8080`. Except for the two public
-auth routes, every request must include a `Authorization: Bearer <token>` header.
+- **Frontend:** React 18 with React Router and Vite
+- **Backend:** Java 21, Spring Boot 3.3, Spring Security, Spring Cloud Gateway (four microservices)
+- **Database:** MongoDB 7
+- **Auth:** JWT (JJWT) with BCrypt-hashed passwords
+- **Ingestion:** Open Library API via Spring `RestClient`
+- **Local run / deploy:** Docker Compose locally, AWS ECS Fargate (Terraform) for cloud
 
-| Method | Endpoint                                        | Service    | Description                          |
-|--------|-------------------------------------------------|------------|--------------------------------------|
-| `POST` | `/api/auth/register`                            | social     | Create an account _(public)_         |
-| `POST` | `/api/auth/login`                               | social     | Log in, receive a JWT _(public)_     |
-| `GET`  | `/api/auth/me`                                  | social     | Current user profile                 |
-| `GET`  | `/api/books/search`                             | catalog    | Search books by title                |
-| `GET`  | `/api/books/top`                                | catalog    | Top books by rating / wishlist count |
-| `GET`  | `/api/books/{id}`                               | catalog    | Book detail                          |
-| `PUT`  | `/api/ratings/{bookId}`                         | catalog    | Rate a book                          |
-| `POST` | `/api/wishlist/{bookId}`                        | catalog    | Add a book to the wishlist           |
-| `DELETE` | `/api/wishlist/{bookId}`                      | catalog    | Remove a book from the wishlist      |
-| `GET`  | `/api/profile/summary`                          | social     | Reading journey summary + streak     |
-| `GET`  | `/api/profile/books`                            | social     | Books on the user's reading journey  |
-| `POST` | `/api/profile/progress`                         | social     | Update reading progress / status     |
-| `GET`  | `/api/profile/books/{bookId}/completion-rate`   | social     | Completion rate for a book           |
-| `GET`  | `/api/recommendations/books`                    | social     | Personalized book recommendations    |
-| `GET`  | `/api/recommendations/common`                   | social     | Books in common with other readers   |
-| `GET`  | `/api/clubs`                                     | social     | List book clubs                      |
-| `POST` | `/api/clubs/{clubId}/join`                       | social     | Join a club (capacity-limited)       |
-| `GET`  | `/api/clubs/recommendations`                    | social     | Genre-based club recommendations     |
-| `POST` | `/api/discovery/ingest`                          | discovery  | Ingest books from Open Library       |
 
-<br />
+# Contributors
 
-## 🐳 Run locally with Docker Compose
+|Name|GitHub|
+|-|-|
+|Azka | [azka-siddiqui](https://github.com/azka-siddiqui) |
+---
 
-Requires Docker with the Compose plugin.
 
-```sh
-docker compose up --build
-```
-
-This starts MongoDB, seeds the sample data, builds and runs all four services and
-the frontend. Once healthy:
-
-- Frontend: <http://localhost:3000>
-- API gateway: <http://localhost:8080>
-
-Sign in with the demo account **`alex` / `password123`** (other seeded users: `sam`, `jordan`).
-
-<br />
-
-## 💻 Run without Docker
-
-Requires **JDK 21**, **Maven**, **Node 18+**, and a local MongoDB on `mongodb://localhost:27017`.
-
-```sh
-# 1. Seed sample data (books, clubs, progress, …)
-MONGO_URI=mongodb://localhost:27017 MONGO_DATABASE=bookbuddy SEED_DIR=./seed \
-  sh deploy/seed/seed.sh
-
-# 2. Build all services
-mvn -q -DskipTests package
-
-# 3. Start each service (separate terminals). social-service seeds demo users on
-#    startup under the default 'dev' profile.
-java -jar services/social-service/target/*.jar
-java -jar services/catalog-service/target/*.jar
-java -jar services/discovery-service/target/*.jar
-java -jar services/api-gateway/target/*.jar
-
-# 4. Frontend
-cd frontend && npm install && npm run dev   # http://localhost:5173
-```
-
-<br />
-
-## 🌐 Ingest real books from Open Library
-
-The discovery service scrapes and stores books on demand:
-
-```sh
-curl -X POST http://localhost:8082/api/discovery/ingest \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"harry potter"}'
-```
-
-<br />
-
-## ⚙️ Configuration
-
-Copy `.env.example` to `.env` and adjust as needed. Key variables:
-
-| Variable            | Purpose                                          |
-|---------------------|--------------------------------------------------|
-| `MONGO_URI`         | MongoDB connection string                        |
-| `MONGO_DATABASE`    | MongoDB database name                            |
-| `JWT_SECRET`        | Base64 HS256 secret (must match across services) |
-| `JWT_EXPIRATION_MS` | Token lifetime                                   |
-| `OPEN_LIBRARY_BASE_URL` | Open Library API base URL                    |
-| `VITE_API_BASE_URL` | Gateway URL the frontend calls                   |
-
-> ⚠️ The default `JWT_SECRET` is for local development only — set a strong secret in
-> any real environment (`openssl rand -base64 32`).
-
-<br />
-
-## 🧪 Tests
-
-```sh
-mvn test
-```
-
-Unit tests cover the Open Library normalization, rating recomputation, reading
-streak transitions, recommendation scoring, and the capacity-safe club join.
-
-<br />
-
-## ☁️ Cloud deployment
-
-Terraform describing an ECS Fargate deployment lives in
-[`deploy/aws`](deploy/aws/README.md).
-
-<br />
-
-## 📚 Documentation
-
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — services, data store, and cross-cutting concerns.
-- [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) — MongoDB collections and document shapes.
-
-<br />
-
-## 👥 Contributors
-
-- [@azka-siddiqui](https://github.com/azka-siddiqui)
-
-<br />
-
-<div align="center">
-<sub>Built with ☕ Java, 🍃 Spring Boot, and 📚 a love of reading.</sub>
-</div>
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[Java]: https://img.shields.io/badge/java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white
+[Spring]: https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white
+[MongoDB]: https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white
+[Docker]: https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white
