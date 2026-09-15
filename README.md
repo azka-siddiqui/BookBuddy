@@ -26,7 +26,7 @@ JWT_EXPIRATION_MS=86400000
 ```
 > The default `JWT_SECRET` is fine for local development, but set a real one anywhere else — every service has to share the same secret for tokens to validate.
 
-## Screenshots
+## Screenshots (Demo Acct)
 **Home page:** \
 <img width="1903" height="924" alt="Page1" src="https://github.com/user-attachments/assets/a1efc607-be11-4018-b8da-45b4d241ecd3" />
 
