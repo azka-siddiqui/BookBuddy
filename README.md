@@ -1,5 +1,8 @@
 # BookBuddy
 
+<img width="1439" height="761" alt="Screenshot 2026-09-14 at 10 07 00 PM" src="https://github.com/user-attachments/assets/99cc4de0-0d6e-483b-a6c9-df9052a7f312" />
+
+
 Discover, track and share books. BookBuddy is a full-stack **book discovery,
 tracking and social reading** platform built as a set of **Spring Boot
 microservices** behind an API gateway, backed by **MongoDB**, with a **React**
